@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset='utf-8' />
-    <title>Mapa 2D de Palmas</title>
+    <title>Mapa 2D de Palmas (Melhorado)</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -14,8 +14,28 @@
     
     <style>
         body { margin: 0; padding: 0; }
-        /* O Leaflet precisa que o <div> tenha uma altura definida */
         #map { height: 100vh; width: 100%; }
+        
+        /* Estilo para o conteúdo do pop-up */
+        .leaflet-popup-content-wrapper {
+            border-radius: 5px;
+        }
+        .leaflet-popup-content h3 {
+            margin: 0 0 10px 0; /* Título */
+            text-align: center;
+        }
+        .leaflet-popup-content a {
+            display: block;
+            text-align: center;
+            background-color: #0078A8;
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+        .leaflet-popup-content a:hover {
+            background-color: #005f86;
+        }
     </style>
 </head>
 <body>
@@ -26,44 +46,52 @@
     // 4. O JavaScript para criar o mapa
 
     // Inicializa o mapa e foca em Palmas
-    // Note que o Leaflet usa [Latitude, Longitude], o oposto do Mapbox
     const map = L.map('map').setView([-10.1844, -48.3336], 13);
 
-    // Adiciona a camada de mapa (os "azulejos")
-    // Estamos usando o OpenStreetMap, que é gratuito e não requer chave
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    // --- Adicionando o Marcador (Ponto Azul) ---
-    
-    // Coordenadas (Ex: Praça dos Girassóis)
-    const localCoordenadas = [-10.1780, -48.3330];
-    const siteDestino = 'https://g1.globo.com/to/tocantins/'; // Site para onde vai redicionar
-
-    // Cria o marcador
-    const marker1 = L.marker(localCoordenadas).addTo(map);
-
-    // --- Adicionando o Evento de Clique ---
-    
-    // Adiciona um evento de clique diretamente no marcador
-    marker1.on('click', function() {
-        console.log("Marcador clicado! Redirecionando para:", siteDestino);
-        
-        // Redireciona o usuário para o site de destino
-        // Use window.open para abrir em uma nova aba:
-        // window.open(siteDestino, '_blank');
-        
-        // Use window.location.href para ir na mesma aba:
-        window.location.href = siteDestino;
+    // --- MELHORIA: Camada de Satélite (Grátis, sem API) ---
+    const sateliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     });
-
-    // --- (Opcional) Adicione um segundo marcador ---
-    const marker2 = L.marker([-10.2045, -48.3240]).addTo(map); // Ex: Outro local (Cesamar)
     
-    marker2.on('click', function() {
-        window.open('https://www.palmas.to.gov.br/', '_blank');
-    });
+    // (Opcional) Se quiser o mapa de ruas de volta, comente a linha 'sateliteLayer.addTo(map);'
+    // e descomente esta:
+    // const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    // }).addTo(map);
+
+    sateliteLayer.addTo(map); // Adiciona a camada de satélite ao mapa
+
+    // --- MELHORIA: Marcadores com Pop-up ---
+    
+    // --- Marcador 1: Praça dos Girassóis ---
+    const localCoordenadas1 = [-10.1780, -48.3330];
+    const siteDestino1 = 'https://g1.globo.com/to/tocantins/';
+    
+    // Conteúdo HTML para o pop-up
+    const popupContent1 = `
+        <h3>Praça dos Girassóis</h3>
+        <p>A maior praça da América Latina e blá blá blá...</p>
+        <a href="${siteDestino1}" target="_blank">Visitar G1 (Nova Aba)</a>
+    `;
+
+    // Cria o marcador e vincula o pop-up
+    const marker1 = L.marker(localCoordenadas1)
+        .addTo(map)
+        .bindPopup(popupContent1); // Vincula o pop-up ao marcador
+
+    // --- Marcador 2: Parque Cesamar ---
+    const localCoordenadas2 = [-10.2045, -48.3240];
+    const siteDestino2 = 'https://www.palmas.to.gov.br/';
+    
+    const popupContent2 = `
+        <h3>Parque Cesamar</h3>
+        <p>Área verde para lazer e esportes.</p>
+        <a href="${siteDestino2}" target="_blank">Site da Prefeitura</a>
+    `;
+
+    const marker2 = L.marker(localCoordenadas2)
+        .addTo(map)
+        .bindPopup(popupContent2);
 
 </script>
 
